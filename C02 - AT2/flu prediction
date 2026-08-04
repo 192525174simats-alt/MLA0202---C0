@@ -1,0 +1,76 @@
+from sklearn.naive_bayes import GaussianNB
+
+X = [
+    [1, 1, 1],
+    [1, 1, 0],
+    [1, 0, 1],
+    [0, 1, 1],
+    [0, 0, 0],
+    [0, 1, 0],
+    [1, 0, 0],
+    [0, 0, 1]
+]
+
+y = [
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0
+]
+fever = [1, 1, 1, 1, 0, 0, 0, 0, 1, 0]
+cough = [1, 1, 0, 1, 1, 0, 0, 1, 1, 0]
+headache = [1, 0, 1, 1, 0, 1, 0, 0, 1, 0]
+
+flu = [1, 1, 1, 1, 0, 0, 0, 0, 1, 0]
+
+X = []
+
+for i in range(len(fever)):
+    X.append([fever[i], cough[i], headache[i]])
+
+model = GaussianNB()
+
+model.fit(X, y)
+model.fit(X, flu)
+
+fever = int(input("Fever (1=Yes, 0=No): "))
+cough = int(input("Cough (1=Yes, 0=No): "))
+headache = int(input("Headache (1=Yes, 0=No): "))
+new_fever = int(input("Fever (1=Yes, 0=No): "))
+new_cough = int(input("Cough (1=Yes, 0=No): "))
+new_headache = int(input("Headache (1=Yes, 0=No): "))
+
+new_patient = [[fever, cough, headache]]
+new_patient = [[new_fever, new_cough, new_headache]]
+
+prediction = model.predict(new_patient)
+
+print("\nFLU PREDICTION")
+print("\n======================================")
+print("          FLU PREDICTION SYSTEM")
+print("======================================")
+
+print("Total Patients     :", len(X))
+print("Symptoms Used      : Fever, Cough, Headache")
+print("Model              : Naive Bayes")
+
+print("--------------------------------------")
+
+print("Fever              :", new_fever)
+print("Cough              :", new_cough)
+print("Headache           :", new_headache)
+
+print("--------------------------------------")
+
+if prediction[0] == 1:
+    print("Result: Patient may have Flu")
+    print("Prediction         : FLU")
+else:
+    print("Result: Patient may not have Flu")
+    print("Prediction         : NO FLU")
+
+print("======================================")
