@@ -1,0 +1,88 @@
+import numpy as np
+
+X = np.array([
+    [1,1,0],
+    [1,1,0],
+    [1,0,0],
+    [0,0,1],
+    [0,0,1],
+    [0,0,1],
+    [0,1,0],
+    [0,0,1]
+])
+
+y = np.array([1,1,1,0,0,0,1,0])
+
+spam = X[y == 1]
+not_spam = X[y == 0]
+
+spam_probability = np.mean(spam, axis=0)
+not_spam_probability = np.mean(not_spam, axis=0)
+
+print("NAIVE BAYES CLASSIFICATION")
+print()
+
+print("Probability without smoothing")
+print("Spam:", spam_probability)
+print("Not Spam:", not_spam_probability)
+
+new_email = np.array([1,1,1])
+
+spam_score = 1
+not_spam_score = 1
+
+for i in range(3):
+    spam_score *= spam_probability[i]
+    not_spam_score *= not_spam_probability[i]
+
+print("\nNew Email Features:")
+print("Free Words:", new_email[0])
+print("Offer Words:", new_email[1])
+print("Meeting Words:", new_email[2])
+
+print("\nWithout Laplace Smoothing")
+print("Spam Probability:", spam_score)
+print("Not Spam Probability:", not_spam_score)
+
+if spam_score > not_spam_score:
+    print("Prediction: SPAM")
+else:
+    print("Prediction: NOT SPAM")
+
+alpha = 1
+k = 2
+
+spam_count = np.sum(spam, axis=0)
+not_spam_count = np.sum(not_spam, axis=0)
+
+spam_probability_smooth = (
+    spam_count + alpha
+) / (
+    len(spam) + alpha * k
+)
+
+not_spam_probability_smooth = (
+    not_spam_count + alpha
+) / (
+    len(not_spam) + alpha * k
+)
+
+print("\nProbability after Laplace Smoothing")
+print("Spam:", spam_probability_smooth)
+print("Not Spam:", not_spam_probability_smooth)
+
+spam_score_smooth = 1
+not_spam_score_smooth = 1
+
+for i in range(3):
+    spam_score_smooth *= spam_probability_smooth[i]
+    not_spam_score_smooth *= not_spam_probability_smooth[i]
+
+print("\nAfter Laplace Smoothing")
+print("Spam Probability:", spam_score_smooth)
+print("Not Spam Probability:", not_spam_score_smooth)
+
+if spam_score_smooth > not_spam_score_smooth:
+    print("Final Prediction: SPAM")
+else:
+    print("Final Prediction: NOT SPAM")
