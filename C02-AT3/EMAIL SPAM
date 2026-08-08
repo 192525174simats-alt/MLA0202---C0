@@ -1,0 +1,103 @@
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+X = np.array([
+    [1,0,2],
+    [2,0,3],
+    [0,0,1],
+    [1,1,2],
+    [0,0,0],
+    [2,1,4],
+    [8,5,15],
+    [7,4,12],
+    [9,6,18],
+    [6,4,10],
+    [8,7,20],
+    [5,3,9],
+    [1,0,2],
+    [2,1,3],
+    [7,5,14],
+    [9,6,17]
+])
+
+y = np.array([
+    0,0,0,0,0,0,1,1,
+    1,1,1,1,0,0,1,1
+])
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42, stratify=y
+)
+
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+probability = model.predict_proba(X_test)[:,1]
+
+prediction = (probability >= 0.5).astype(int)
+
+print("SPAM EMAIL DETECTION")
+print()
+
+for i in range(len(X_test)):
+    if prediction[i] == 1:
+        result = "SPAM"
+    else:
+        result = "NOT SPAM"
+
+    if y_test[i] == 1:
+        actual = "SPAM"
+    else:
+        actual = "NOT SPAM"
+
+    print("Email", i + 1)
+    print("Spam Words:", X_test[i][0])
+    print("Links:", X_test[i][1])
+    print("Capital Letters:", X_test[i][2])
+    print("Actual:", actual)
+    print("Predicted:", result)
+    print("Spam Probability:", round(probability[i], 2))
+    print()
+
+print("Accuracy:", accuracy_score(y_test, prediction))
+
+print("\nConfusion Matrix")
+print(confusion_matrix(y_test, prediction))
+
+threshold = 0.30
+
+prediction2 = (probability >= threshold).astype(int)
+
+print("\nAFTER THRESHOLD ADJUSTMENT")
+print("Threshold:", threshold)
+
+for i in range(len(X_test)):
+    if prediction2[i] == 1:
+        result = "SPAM"
+    else:
+        result = "NOT SPAM"
+
+    print("Email", i + 1, ":", result)
+
+print("New Accuracy:", accuracy_score(y_test, prediction2))
+
+model2 = LogisticRegression(class_weight="balanced")
+model2.fit(X_train, y_train)
+
+probability2 = model2.predict_proba(X_test)[:,1]
+
+prediction3 = (probability2 >= 0.5).astype(int)
+
+print("\nBALANCED MODEL")
+
+for i in range(len(X_test)):
+    if prediction3[i] == 1:
+        result = "SPAM"
+    else:
+        result = "NOT SPAM"
+
+    print("Email", i + 1, ":", result)
+
+print("Balanced Accuracy:", accuracy_score(y_test, prediction3))
