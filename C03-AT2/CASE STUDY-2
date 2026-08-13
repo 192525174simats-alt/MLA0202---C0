@@ -1,0 +1,148 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA,FactorAnalysis,FastICA
+from sklearn.mixture import GaussianMixture
+from sklearn.metrics import silhouette_score
+
+data=np.array([
+[14.23,1.71,2.43,15.6,127,2.80],
+[13.20,1.78,2.14,11.2,100,2.65],
+[13.16,2.36,2.67,18.6,101,2.80],
+[14.37,1.95,2.50,16.8,113,3.85],
+[13.24,2.59,2.87,21.0,118,2.80],
+[14.20,1.76,2.45,15.2,112,3.27],
+[14.39,1.87,2.45,14.6,96,2.50],
+[14.06,2.15,2.61,17.6,121,2.60],
+[14.83,1.64,2.17,14.0,97,2.80],
+[13.86,1.35,2.27,16.0,98,2.98]
+])
+
+print("WINE DIMENSIONALITY REDUCTION AND CLUSTERING")
+print("----------------------------------------------")
+print("Number of wine samples:",len(data))
+print("Number of original features:",data.shape[1])
+
+scaler=StandardScaler()
+X=scaler.fit_transform(data)
+
+print("\nStandardization completed.")
+print("Mean after scaling:",np.round(X.mean(axis=0),3))
+print("Standard deviation:",np.round(X.std(axis=0),3))
+
+pca=PCA(n_components=2)
+X_pca=pca.fit_transform(X)
+pv=pca.explained_variance_ratio_
+
+print("\nPCA RESULTS")
+print("-----------")
+print("PC1 variance:",round(pv[0]*100,2),"%")
+print("PC2 variance:",round(pv[1]*100,2),"%")
+print("Total variance:",round(sum(pv)*100,2),"%")
+
+fa=FactorAnalysis(n_components=2,random_state=42)
+X_fa=fa.fit_transform(X)
+
+print("\nFACTOR ANALYSIS")
+print("---------------")
+print("Reduced dimensions:",X_fa.shape[1])
+print("Factor 1 variance:",round(np.var(X_fa[:,0]),3))
+print("Factor 2 variance:",round(np.var(X_fa[:,1]),3))
+
+ica=FastICA(n_components=2,random_state=42,
+            max_iter=1000,whiten="unit-variance")
+X_ica=ica.fit_transform(X)
+
+print("\nINDEPENDENT COMPONENT ANALYSIS")
+print("-------------------------------")
+print("Reduced dimensions:",X_ica.shape[1])
+print("IC1 standard deviation:",round(np.std(X_ica[:,0]),3))
+print("IC2 standard deviation:",round(np.std(X_ica[:,1]),3))
+
+print("\nGMM CLUSTERING")
+print("--------------")
+
+best=None
+best_score=-1
+best_k=0
+
+for k in range(2,5):
+    g=GaussianMixture(n_components=k,random_state=42,n_init=10)
+    labels=g.fit_predict(X_pca)
+    score=silhouette_score(X_pca,labels)
+    print("Clusters =",k,"| Silhouette Score =",round(score,3))
+    if score>best_score:
+        best_score=score
+        best=g
+        best_k=k
+
+labels=best.predict(X_pca)
+
+print("\nOptimal number of GMM clusters:",best_k)
+print("Best silhouette score:",round(best_score,3))
+
+print("\nGMM Cluster Sizes")
+print("-----------------")
+
+for c in range(best_k):
+    print("Cluster",c+1,":",sum(labels==c),"samples")
+
+print("\nWine Sample Cluster Assignment")
+print("-------------------------------")
+
+for i,c in enumerate(labels):
+    print("Sample",i+1,"-> Cluster",c+1)
+
+plt.figure(figsize=(8,6))
+for c in range(best_k):
+    p=X_pca[labels==c]
+    plt.scatter(p[:,0],p[:,1],s=100,label="Cluster "+str(c+1))
+plt.xlabel("Principal Component 1")
+plt.ylabel("Principal Component 2")
+plt.title("PCA Representation of Wine Samples")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+plt.figure(figsize=(8,6))
+for c in range(best_k):
+    p=X_fa[labels==c]
+    plt.scatter(p[:,0],p[:,1],s=100,label="Cluster "+str(c+1))
+plt.xlabel("Factor 1")
+plt.ylabel("Factor 2")
+plt.title("Factor Analysis Representation")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+plt.figure(figsize=(8,6))
+for c in range(best_k):
+    p=X_ica[labels==c]
+    plt.scatter(p[:,0],p[:,1],s=100,label="Cluster "+str(c+1))
+plt.xlabel("Independent Component 1")
+plt.ylabel("Independent Component 2")
+plt.title("ICA Representation of Wine Samples")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+pa=PCA()
+pa.fit(X)
+v=pa.explained_variance_ratio_*100
+
+plt.figure(figsize=(8,5))
+plt.bar(range(1,len(v)+1),v)
+plt.xlabel("Principal Component")
+plt.ylabel("Explained Variance (%)")
+plt.title("PCA Explained Variance")
+plt.xticks(range(1,len(v)+1))
+plt.grid(axis="y")
+plt.show()
+
+print("\nFINAL INTERPRETATION")
+print("--------------------")
+print("PCA reduced six features into two components.")
+print("Factor Analysis represented the data using two factors.")
+print("ICA transformed the data into two independent components.")
+print("GMM grouped similar wine samples into",best_k,"clusters.")
+print("Silhouette score evaluated the clustering quality.")
