@@ -1,0 +1,184 @@
+import matplotlib.pyplot as plt
+
+# ------------------------------------------------
+# Customer Support Email
+# ------------------------------------------------
+
+words = [
+    "Rahul",
+    "received",
+    "a",
+    "Laptop",
+    "with",
+    "Order",
+    "ID",
+    "D321",
+    "and",
+    "the",
+    "Laptop",
+    "is",
+    "damaged"
+]
+
+# CRF-style predicted labels
+labels = [
+    "CUSTOMER",
+    "O",
+    "O",
+    "PRODUCT",
+    "O",
+    "O",
+    "O",
+    "ORDER_ID",
+    "O",
+    "O",
+    "PRODUCT",
+    "O",
+    "ISSUE"
+]
+
+print("CONDITIONAL RANDOM FIELD - CUSTOMER SUPPORT NER")
+print("------------------------------------------------")
+
+print()
+print("Customer Support Email:")
+print(" ".join(words))
+
+print()
+print("Word-Level Entity Prediction:")
+print("--------------------------------")
+
+for word, label in zip(words, labels):
+    print("{:<15} {}".format(word, label))
+
+
+# ------------------------------------------------
+# GRAPH 1: WORD → ENTITY LABEL GRAPH
+# ------------------------------------------------
+
+fig, ax = plt.subplots(figsize=(14, 6))
+
+x_positions = list(range(len(words)))
+
+# Draw word nodes
+for i, word in enumerate(words):
+
+    ax.text(
+        i,
+        2,
+        word,
+        ha="center",
+        va="center",
+        fontsize=10,
+        bbox=dict(
+            boxstyle="round,pad=0.5",
+            facecolor="lightblue",
+            edgecolor="black"
+        )
+    )
+
+# Draw entity label nodes
+for i, label in enumerate(labels):
+
+    if label != "O":
+
+        ax.text(
+            i,
+            1,
+            label,
+            ha="center",
+            va="center",
+            fontsize=9,
+            fontweight="bold",
+            bbox=dict(
+                boxstyle="round,pad=0.4",
+                facecolor="lightgreen",
+                edgecolor="black"
+            )
+        )
+
+        # Connect word to entity
+        ax.annotate(
+            "",
+            xy=(i, 1.35),
+            xytext=(i, 1.7),
+            arrowprops=dict(
+                arrowstyle="->",
+                linewidth=1.5
+            )
+        )
+
+ax.text(
+    -0.8,
+    2,
+    "WORDS",
+    fontsize=11,
+    fontweight="bold"
+)
+
+ax.text(
+    -0.8,
+    1,
+    "ENTITIES",
+    fontsize=11,
+    fontweight="bold"
+)
+
+ax.set_xlim(-1, len(words))
+ax.set_ylim(0.4, 2.6)
+ax.axis("off")
+
+plt.title(
+    "CRF Named Entity Recognition – Customer Support Email",
+    fontsize=15,
+    fontweight="bold"
+)
+
+plt.show()
+
+
+# ------------------------------------------------
+# GRAPH 2: ENTITY OCCURRENCES
+# ------------------------------------------------
+
+entity_names = [
+    "CUSTOMER",
+    "PRODUCT",
+    "ORDER_ID",
+    "ISSUE"
+]
+
+entity_counts = [
+    labels.count("CUSTOMER"),
+    labels.count("PRODUCT"),
+    labels.count("ORDER_ID"),
+    labels.count("ISSUE")
+]
+
+plt.figure(figsize=(8, 5))
+
+bars = plt.bar(
+    entity_names,
+    entity_counts
+)
+
+plt.xlabel("Entity Type")
+plt.ylabel("Number of Detected Entities")
+
+plt.title(
+    "Detected Entities in Customer Support Email",
+    fontsize=14,
+    fontweight="bold"
+)
+
+for bar, value in zip(bars, entity_counts):
+
+    plt.text(
+        bar.get_x() + bar.get_width() / 2,
+        value + 0.05,
+        str(value),
+        ha="center",
+        fontweight="bold"
+    )
+
+plt.show()
