@@ -1,0 +1,182 @@
+import matplotlib.pyplot as plt
+
+# Hidden states
+states = ["Healthy", "Warning", "Failure"]
+
+# Sensor observations
+observations = [
+    "Normal",
+    "Normal",
+    "Slightly High",
+    "High",
+    "High",
+    "Very High",
+    "Very High"
+]
+
+# State transition probabilities
+transition = {
+    "Healthy": {
+        "Healthy": 0.80,
+        "Warning": 0.18,
+        "Failure": 0.02
+    },
+    "Warning": {
+        "Healthy": 0.10,
+        "Warning": 0.70,
+        "Failure": 0.20
+    },
+    "Failure": {
+        "Healthy": 0.02,
+        "Warning": 0.08,
+        "Failure": 0.90
+    }
+}
+
+# Predicted machine states for observations
+predicted_states = [
+    "Healthy",
+    "Healthy",
+    "Warning",
+    "Warning",
+    "Warning",
+    "Failure",
+    "Failure"
+]
+
+print("HIDDEN MARKOV MODEL - MACHINE MAINTENANCE")
+print("-------------------------------------------")
+
+for i in range(len(observations)):
+    print(
+        "Time", i + 1,
+        "| Sensor:", observations[i],
+        "| Predicted State:", predicted_states[i]
+    )
+
+# ------------------------------------------------
+# GRAPH 1: HMM STATE TRANSITION GRAPH
+# ------------------------------------------------
+
+fig, ax = plt.subplots(figsize=(10, 5))
+
+positions = {
+    "Healthy": (1, 2),
+    "Warning": (4, 2),
+    "Failure": (7, 2)
+}
+
+# Draw states
+for state, (x, y) in positions.items():
+    ax.text(
+        x, y, state,
+        ha="center",
+        va="center",
+        fontsize=14,
+        fontweight="bold",
+        bbox=dict(
+            boxstyle="round,pad=0.7",
+            facecolor="lightblue",
+            edgecolor="black"
+        )
+    )
+
+# Healthy -> Warning
+ax.annotate(
+    "",
+    xy=(3.3, 2),
+    xytext=(1.7, 2),
+    arrowprops=dict(arrowstyle="->", linewidth=2)
+)
+
+# Warning -> Failure
+ax.annotate(
+    "",
+    xy=(6.3, 2),
+    xytext=(4.7, 2),
+    arrowprops=dict(arrowstyle="->", linewidth=2)
+)
+
+# Transition probabilities
+ax.text(2.5, 2.35, "0.18", fontsize=11)
+ax.text(5.5, 2.35, "0.20", fontsize=11)
+
+# Sensor observations
+ax.text(
+    1, 0.8,
+    "Normal Temperature\nNormal Vibration\nNormal Motor Noise",
+    ha="center",
+    fontsize=10
+)
+
+ax.text(
+    4, 0.8,
+    "High Temperature\nHigh Vibration\nHigh Motor Noise",
+    ha="center",
+    fontsize=10
+)
+
+ax.text(
+    7, 0.8,
+    "Very High Temperature\nVery High Vibration\nVery High Motor Noise",
+    ha="center",
+    fontsize=10
+)
+
+ax.set_xlim(0, 8)
+ax.set_ylim(0, 3)
+ax.axis("off")
+
+plt.title(
+    "HMM Graph – Predictive Machine Maintenance",
+    fontsize=16,
+    fontweight="bold"
+)
+
+plt.show()
+
+# ------------------------------------------------
+# GRAPH 2: MACHINE CONDITION OVER TIME
+# ------------------------------------------------
+
+state_values = {
+    "Healthy": 1,
+    "Warning": 2,
+    "Failure": 3
+}
+
+values = [
+    state_values[state]
+    for state in predicted_states
+]
+
+time = list(range(1, len(values) + 1))
+
+plt.figure(figsize=(10, 5))
+
+plt.plot(
+    time,
+    values,
+    marker="o",
+    linewidth=2
+)
+
+plt.xticks(time)
+
+plt.yticks(
+    [1, 2, 3],
+    ["Healthy", "Warning", "Failure"]
+)
+
+plt.xlabel("Time")
+plt.ylabel("Machine Condition")
+
+plt.title(
+    "Predicted Machine Condition Over Time",
+    fontsize=15,
+    fontweight="bold"
+)
+
+plt.grid(True)
+
+plt.show()
