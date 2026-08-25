@@ -1,1 +1,73 @@
 
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+
+total_patients = 1000000
+sample_size = 50000
+
+age = np.random.randint(18, 81, total_patients)
+bmi = np.random.normal(25, 4, total_patients)
+glucose = np.random.normal(110, 25, total_patients)
+blood_pressure = np.random.normal(125, 18, total_patients)
+
+risk_score = (
+    0.03 * age +
+    0.04 * (bmi - 18) +
+    0.02 * glucose +
+    0.03 * blood_pressure
+)
+
+risk = np.where(risk_score < 5.8, "Low",
+       np.where(risk_score < 7.2, "Medium", "High"))
+
+categories = ["Low", "Medium", "High"]
+population_counts = []
+sample_counts = []
+
+for category in categories:
+    population_index = np.where(risk == category)[0]
+    population_counts.append(len(population_index))
+
+    required = int(len(population_index) / total_patients * sample_size)
+    selected = np.random.choice(population_index, required, replace=False)
+    sample_counts.append(len(selected))
+
+print("Healthcare Dataset")
+print("------------------")
+print("Total records:", total_patients)
+print("Sample records:", sum(sample_counts))
+print("\nPopulation distribution:")
+
+for i in range(3):
+    percentage = population_counts[i] / total_patients * 100
+    print(categories[i], ":", population_counts[i],
+          "(", round(percentage, 2), "%)")
+
+print("\nStratified sample distribution:")
+
+for i in range(3):
+    percentage = sample_counts[i] / sum(sample_counts) * 100
+    print(categories[i], ":", sample_counts[i],
+          "(", round(percentage, 2), "%)")
+
+population_percent = np.array(population_counts) / total_patients * 100
+sample_percent = np.array(sample_counts) / sum(sample_counts) * 100
+
+x = np.arange(len(categories))
+width = 0.35
+
+plt.figure(figsize=(9, 5))
+plt.bar(x - width / 2, population_percent, width,
+        label="Full Dataset")
+plt.bar(x + width / 2, sample_percent, width,
+        label="Stratified Sample")
+
+plt.xticks(x, categories)
+plt.xlabel("Patient Risk Category")
+plt.ylabel("Percentage of Patients")
+plt.title("Population vs Stratified Sample")
+plt.legend()
+plt.grid(axis="y", alpha=0.3)
+plt.show()
