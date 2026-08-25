@@ -1,1 +1,80 @@
 
+import numpy as np
+import matplotlib.pyplot as plt
+
+grid = np.array([
+    [0, 0, 0, -1, 0, 0],
+    [0, -1, 0, -1, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+    [-1, 0, -1, 0, -1, 0],
+    [0, 0, 0, 0, 0, 0],
+    [0, -1, 0, 0, 0, 10]
+])
+
+rows, cols = grid.shape
+goal = (5, 5)
+gamma = 0.90
+actions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+values = np.zeros((rows, cols))
+
+for iteration in range(100):
+    new_values = values.copy()
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r, c] == -1 or (r, c) == goal:
+                continue
+            rewards = []
+            for dr, dc in actions:
+                nr, nc = r + dr, c + dc
+                if nr < 0 or nr >= rows or nc < 0 or nc >= cols:
+                    rewards.append(-10)
+                elif grid[nr, nc] == -1:
+                    rewards.append(-10)
+                else:
+                    reward = grid[nr, nc] - 1
+                    rewards.append(reward + gamma * values[nr, nc])
+            new_values[r, c] = max(rewards)
+    if np.max(abs(new_values - values)) < 0.001:
+        break
+    values = new_values
+
+policy = np.zeros((rows, cols))
+for r in range(rows):
+    for c in range(cols):
+        if grid[r, c] == -1 or (r, c) == goal:
+            continue
+        scores = []
+        for dr, dc in actions:
+            nr, nc = r + dr, c + dc
+            if nr < 0 or nr >= rows or nc < 0 or nc >= cols:
+                scores.append(-999)
+            elif grid[nr, nc] == -1:
+                scores.append(-999)
+            else:
+                scores.append(grid[nr, nc] - 1 + gamma * values[nr, nc])
+        policy[r, c] = np.argmax(scores)
+
+print("Optimal Value Matrix:")
+print(np.round(values, 2))
+print("Iterations:", iteration + 1)
+print("Goal:", goal)
+print("Maximum allowed moves: 25")
+print("Battery capacity: 30 units")
+
+plt.figure(figsize=(8, 6))
+plt.imshow(values, cmap="viridis")
+plt.colorbar(label="State Value")
+plt.title("Warehouse Robot Value Iteration")
+plt.xlabel("Warehouse Column")
+plt.ylabel("Warehouse Row")
+
+for r in range(rows):
+    for c in range(cols):
+        if grid[r, c] == -1:
+            plt.text(c, r, "X", ha="center", va="center", color="red",
+                     fontsize=18, fontweight="bold")
+        elif (r, c) == goal:
+            plt.text(c, r, "G", ha="center", va="center", color="white",
+                     fontsize=16, fontweight="bold")
+
+plt.show()
