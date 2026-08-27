@@ -1,0 +1,211 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+number_of_states = 6
+number_of_actions = 4
+
+actions = [
+    "Up",
+    "Down",
+    "Left",
+    "Right"
+]
+
+rewards = np.array([
+    [-1, -1, -1, -1],
+    [-1,  2, -1, -1],
+    [-1,  5, -1, -1],
+    [-1,  8, -1, -1],
+    [-1, 10, -1, -1],
+    [ 0,  0,  0,  0]
+])
+
+transitions = np.array([
+    [0, 1, 0, 0],
+    [0, 2, 1, 1],
+    [1, 3, 2, 2],
+    [2, 4, 3, 3],
+    [3, 5, 4, 4],
+    [5, 5, 5, 5]
+])
+
+gamma = 0.90
+
+policy = np.zeros(
+    number_of_states,
+    dtype=int
+)
+
+values = np.zeros(
+    number_of_states
+)
+
+maximum_iterations = 50
+
+for iteration in range(
+    maximum_iterations
+):
+
+    for evaluation in range(100):
+
+        new_values = values.copy()
+
+        for state in range(
+            number_of_states
+        ):
+
+            action = policy[state]
+
+            next_state = transitions[
+                state,
+                action
+            ]
+
+            new_values[state] = (
+                rewards[state, action]
+                + gamma
+                * values[next_state]
+            )
+
+        if np.max(
+            np.abs(
+                new_values - values
+            )
+        ) < 0.001:
+
+            values = new_values
+            break
+
+        values = new_values
+
+    policy_stable = True
+
+    for state in range(
+        number_of_states - 1
+    ):
+
+        old_action = policy[state]
+
+        action_values = []
+
+        for action in range(
+            number_of_actions
+        ):
+
+            next_state = transitions[
+                state,
+                action
+            ]
+
+            value = (
+                rewards[state, action]
+                + gamma
+                * values[next_state]
+            )
+
+            action_values.append(
+                value
+            )
+
+        best_action = np.argmax(
+            action_values
+        )
+
+        policy[state] = best_action
+
+        if best_action != old_action:
+
+            policy_stable = False
+
+    if policy_stable:
+
+        break
+
+print("POLICY ITERATION")
+print("-----------------")
+print("Iterations Required:", iteration + 1)
+print()
+
+print("Optimal State Values")
+
+for state in range(
+    number_of_states
+):
+
+    print(
+        "State",
+        state,
+        ":",
+        round(
+            values[state],
+            3
+        )
+    )
+
+print()
+
+print("Optimal Policy")
+
+for state in range(
+    number_of_states - 1
+):
+
+    print(
+        "State",
+        state,
+        "->",
+        actions[
+            policy[state]
+        ]
+    )
+
+print(
+    "State",
+    number_of_states - 1,
+    "-> Goal"
+)
+
+plt.figure(figsize=(10, 6))
+
+plt.bar(
+    range(number_of_states),
+    values
+)
+
+plt.xlabel("Drone Navigation State")
+plt.ylabel("State Value")
+plt.title(
+    "Policy Iteration for Autonomous Drone Navigation"
+)
+
+plt.xticks(
+    range(number_of_states)
+)
+
+plt.grid(axis="y")
+
+plt.show()
+
+plt.figure(figsize=(10, 6))
+
+policy_numbers = policy.astype(float)
+
+plt.plot(
+    range(number_of_states),
+    policy_numbers,
+    marker="o"
+)
+
+plt.xlabel("Drone State")
+plt.ylabel("Selected Action Number")
+plt.title(
+    "Optimal Drone Navigation Policy"
+)
+
+plt.xticks(
+    range(number_of_states)
+)
+
+plt.grid(True)
+
+plt.show()
