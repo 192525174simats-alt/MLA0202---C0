@@ -1,1 +1,222 @@
 
+import numpy as np
+import matplotlib.pyplot as plt
+
+grid = np.array([
+    [0, 0, 0, 0, 0],
+    [0, -1, 0, -1, 0],
+    [0, 0, 0, -1, 0],
+    [0, -1, 0, 0, 0],
+    [0, 0, 0, 0, 10]
+])
+
+rows = grid.shape[0]
+columns = grid.shape[1]
+
+values = np.zeros(
+    (rows, columns)
+)
+
+gamma = 0.90
+threshold = 0.001
+maximum_iterations = 100
+
+actions = {
+    "Up": (-1, 0),
+    "Down": (1, 0),
+    "Left": (0, -1),
+    "Right": (0, 1)
+}
+
+policy = np.empty(
+    (rows, columns),
+    dtype=object
+)
+
+for iteration in range(
+    maximum_iterations
+):
+
+    new_values = values.copy()
+
+    maximum_change = 0
+
+    for row in range(rows):
+
+        for column in range(columns):
+
+            if grid[row, column] == -1:
+                continue
+
+            if grid[row, column] == 10:
+                new_values[row, column] = 10
+                policy[row, column] = "Goal"
+                continue
+
+            possible_values = []
+            possible_actions = []
+
+            for action_name in actions:
+
+                row_change, column_change = actions[
+                    action_name
+                ]
+
+                new_row = row + row_change
+                new_column = column + column_change
+
+                if (
+                    new_row >= 0
+                    and new_row < rows
+                    and new_column >= 0
+                    and new_column < columns
+                    and grid[new_row, new_column] != -1
+                ):
+
+                    reward = grid[
+                        new_row,
+                        new_column
+                    ]
+
+                    action_value = (
+                        reward
+                        + gamma
+                        * values[
+                            new_row,
+                            new_column
+                        ]
+                    )
+
+                    possible_values.append(
+                        action_value
+                    )
+
+                    possible_actions.append(
+                        action_name
+                    )
+
+            if len(possible_values) > 0:
+
+                best_index = np.argmax(
+                    possible_values
+                )
+
+                new_values[row, column] = (
+                    possible_values[best_index]
+                )
+
+                policy[row, column] = (
+                    possible_actions[best_index]
+                )
+
+            difference = abs(
+                new_values[row, column]
+                - values[row, column]
+            )
+
+            if difference > maximum_change:
+                maximum_change = difference
+
+    values = new_values
+
+    if maximum_change < threshold:
+        break
+
+print("VALUE ITERATION")
+print("----------------")
+print("Iterations Required:", iteration + 1)
+print()
+
+print("Optimal Value Function")
+print()
+
+print(
+    np.round(values, 2)
+)
+
+print()
+
+print("Optimal Policy")
+print()
+
+for row in range(rows):
+
+    for column in range(columns):
+
+        if grid[row, column] == -1:
+
+            print(
+                "Obstacle at",
+                "(",
+                row,
+                ",",
+                column,
+                ")"
+            )
+
+        else:
+
+            print(
+                "State",
+                "(",
+                row,
+                ",",
+                column,
+                ")",
+                "->",
+                policy[row, column]
+            )
+
+plt.figure(figsize=(9, 7))
+
+plt.imshow(
+    values,
+    interpolation="nearest"
+)
+
+plt.colorbar(
+    label="State Value"
+)
+
+plt.xticks(
+    range(columns)
+)
+
+plt.yticks(
+    range(rows)
+)
+
+plt.xlabel("Column")
+plt.ylabel("Row")
+plt.title(
+    "Optimal Value Function for Robot Path Planning"
+)
+
+for row in range(rows):
+
+    for column in range(columns):
+
+        if grid[row, column] == -1:
+
+            text = "X"
+
+        elif grid[row, column] == 10:
+
+            text = "G"
+
+        else:
+
+            text = round(
+                values[row, column],
+                1
+            )
+
+        plt.text(
+            column,
+            row,
+            text,
+            ha="center",
+            va="center"
+        )
+
+plt.show()
