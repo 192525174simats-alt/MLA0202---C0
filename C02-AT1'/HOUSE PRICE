@@ -1,0 +1,49 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+area = np.array([1000, 1500, 800, 1200, 2000])
+bedrooms = np.array([2, 3, 2, 3, 4])
+price = np.array([50, 75, 40, 60, 90])
+
+X = np.column_stack((area, bedrooms))
+
+model = LinearRegression()
+model.fit(X, price)
+
+intercept = model.intercept_
+area_coefficient = model.coef_[0]
+bedroom_coefficient = model.coef_[1]
+
+predicted_price = model.predict(X)
+
+print("HOUSE PRICE PREDICTION USING LINEAR REGRESSION")
+print("----------------------------------------------")
+
+print("\nRegression Coefficients")
+print("Intercept =", intercept)
+print("Area Coefficient =", area_coefficient)
+print("Bedroom Coefficient =", bedroom_coefficient)
+
+print("\nRegression Equation")
+print("Price =", intercept, "+", area_coefficient, "* Area +", bedroom_coefficient, "* Bedrooms")
+
+print("\nActual and Predicted Prices")
+
+for i in range(len(price)):
+    print("House", i + 1,
+          "Area =", area[i],
+          "Bedrooms =", bedrooms[i],
+          "Actual Price =", price[i],
+          "Predicted Price =", predicted_price[i])
+
+plt.scatter(area, price, label="Actual Price")
+plt.scatter(area, predicted_price, label="Predicted Price")
+
+plt.xlabel("Area (sq.ft)")
+plt.ylabel("Price (₹ Lakhs)")
+plt.title("House Area vs Price")
+plt.legend()
+plt.grid(True)
+
+plt.show()

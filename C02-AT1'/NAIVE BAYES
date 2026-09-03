@@ -1,0 +1,82 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+fever = np.array([1, 1, 0, 1, 0])
+headache = np.array([1, 0, 1, 1, 0])
+disease = np.array([1, 1, 0, 1, 0])
+
+yes = np.sum(disease == 1)
+no = np.sum(disease == 0)
+total = len(disease)
+
+prior_yes = yes / total
+prior_no = no / total
+
+print("NAIVE BAYES DISEASE PREDICTION")
+print("------------------------------")
+
+print("\nPrior Probabilities")
+print("P(Disease = Yes) =", prior_yes)
+print("P(Disease = No) =", prior_no)
+
+fever_yes = np.sum((fever == 1) & (disease == 1)) / yes
+no_fever_yes = np.sum((fever == 0) & (disease == 1)) / yes
+
+fever_no = np.sum((fever == 1) & (disease == 0)) / no
+no_fever_no = np.sum((fever == 0) & (disease == 0)) / no
+
+headache_yes = np.sum((headache == 1) & (disease == 1)) / yes
+no_headache_yes = np.sum((headache == 0) & (disease == 1)) / yes
+
+headache_no = np.sum((headache == 1) & (disease == 0)) / no
+no_headache_no = np.sum((headache == 0) & (disease == 0)) / no
+
+print("\nConditional Probabilities")
+
+print("\nGiven Disease = Yes")
+print("P(Fever = 1 | Yes) =", fever_yes)
+print("P(Fever = 0 | Yes) =", no_fever_yes)
+print("P(Headache = 1 | Yes) =", headache_yes)
+print("P(Headache = 0 | Yes) =", no_headache_yes)
+
+print("\nGiven Disease = No")
+print("P(Fever = 1 | No) =", fever_no)
+print("P(Fever = 0 | No) =", no_fever_no)
+print("P(Headache = 1 | No) =", headache_no)
+print("P(Headache = 0 | No) =", no_headache_no)
+
+yes_probability = prior_yes * fever_yes * no_headache_yes
+no_probability = prior_no * fever_no * no_headache_no
+
+total_probability = yes_probability + no_probability
+
+posterior_yes = yes_probability / total_probability
+posterior_no = no_probability / total_probability
+
+print("\nFor Fever = 1 and Headache = 0")
+
+print("P(Yes and Features) =", yes_probability)
+print("P(No and Features) =", no_probability)
+
+print("\nPosterior Probabilities")
+print("P(Disease = Yes | Fever = 1, Headache = 0) =", posterior_yes)
+print("P(Disease = No | Fever = 1, Headache = 0) =", posterior_no)
+
+if posterior_yes > posterior_no:
+    print("\nFinal Prediction = Disease Yes")
+else:
+    print("\nFinal Prediction = Disease No")
+
+labels = ["Disease Yes", "Disease No"]
+values = [posterior_yes, posterior_no]
+
+plt.bar(labels, values)
+
+plt.xlabel("Disease Class")
+plt.ylabel("Posterior Probability")
+plt.title("Naive Bayes Disease Prediction")
+
+plt.ylim(0, 1.1)
+plt.grid(axis="y")
+
+plt.show()
